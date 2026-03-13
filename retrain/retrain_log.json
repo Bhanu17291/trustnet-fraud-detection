@@ -1,0 +1,15 @@
+[
+  {
+    "retrained_at": "2026-03-13T12:00:16.954882",
+    "training_rows": 250196,
+    "metrics": {
+      "roc_auc": 1.0,
+      "precision": 0.9939,
+      "recall": 0.9993,
+      "f1": 0.9966,
+      "val_size": 50040,
+      "fraud_in_val": 4549
+    },
+    "deployed": true
+  }
+]

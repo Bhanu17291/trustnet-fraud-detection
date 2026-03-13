@@ -1,0 +1,16 @@
+{
+    "thresholds": {
+        "block": 0.80,
+        "review": 0.30,
+        "allow": 0.00
+    },
+    "amount_rules": {
+        "high_value_threshold": 5000.0,
+        "micro_tx_threshold": 1.0,
+        "high_value_review_score": 0.15
+    },
+    "velocity_rules": {
+        "max_tx_per_hour": 10,
+        "max_amount_per_hour": 10000.0
+    }
+}
