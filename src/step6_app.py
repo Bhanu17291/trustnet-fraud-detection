@@ -99,7 +99,7 @@ hour   = st.sidebar.slider("Hour of Day", 0, 23, 14)
 time   = st.sidebar.number_input("Time (sec since first tx)", 0, 172800, 50000)
 
 st.sidebar.markdown("---")
-if st.sidebar.button("🔐 Analyse Transaction", type="primary", use_container_width=True):
+if st.sidebar.button("🔐 Analyse Transaction", type="primary"):
     row = {name: 0.0 for name in feature_names}
     row['Amount_scaled']    = (amount - 88.35) / 250.12
     row['Time_scaled']      = (time - 94813) / 47488
@@ -126,6 +126,27 @@ tab1, tab2, tab3 = st.tabs(["📂 Batch Analysis", "📈 Model Performance", "�
 # ── Tab 1: Batch analysis ─────────────────────────────────────
 with tab1:
     st.subheader("Upload Transactions for Batch Analysis")
+
+    # Show expected format
+    with st.expander("📋 Expected CSV Format"):
+        st.markdown("""
+        Your CSV must have these columns:
+        - **Time** — seconds since first transaction
+        - **V1 to V28** — anonymised PCA features
+        - **Amount** — transaction amount in dollars
+        - **Class** (optional) — 0 = legitimate, 1 = fraud
+
+        This matches the format of the Kaggle Credit Card Fraud dataset.
+        """)
+        sample_data = {
+            'Time': [0, 1, 2],
+            'V1': [-1.35, 1.19, -1.35],
+            'V2': [-0.07, 0.26, -1.34],
+            'Amount': [149.62, 2.69, 378.66],
+        }
+        st.dataframe(pd.DataFrame(sample_data))
+        st.caption("... (V1 through V28, then Amount)")
+
     uploaded = st.file_uploader(
         "Upload a CSV file (same format as creditcard.csv — columns V1–V28, Amount, Time)",
         type=['csv']
@@ -135,6 +156,25 @@ with tab1:
         df = pd.read_csv(uploaded)
         st.markdown(f"**{len(df):,}** transactions loaded")
 
+        # ── Column validation ──────────────────────────────────
+        required_cols = [f'V{i}' for i in range(1, 29)] + ['Amount', 'Time']
+        missing_cols  = [c for c in required_cols if c not in df.columns]
+
+        if missing_cols:
+            st.error(f"❌ Your CSV is missing {len(missing_cols)} required column(s).")
+            if len(missing_cols) <= 10:
+                st.write("Missing columns:", missing_cols)
+            else:
+                st.write("Missing columns (first 10):", missing_cols[:10], "...")
+            st.info("""
+            **How to fix this:**
+            - Make sure your CSV has columns: Time, V1, V2, ... V28, Amount
+            - This matches the Kaggle Credit Card Fraud Detection dataset format
+            - Download a sample from: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+            """)
+            st.stop()
+
+        # ── Run detection ──────────────────────────────────────
         with st.spinner("Running fraud detection..."):
             scaler = StandardScaler()
             df['Amount_scaled']   = scaler.fit_transform(df[['Amount']])
