@@ -16,3 +16,5 @@ uvicorn[standard]>=0.24.0
 pydantic>=2.4.0
 httpx>=0.25.0          # for testing the API
 apscheduler>=3.10.0    # for weekly retraining scheduler
+pyvis>=0.3.2
+networkx>=3.0
