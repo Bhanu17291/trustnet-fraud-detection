@@ -177,20 +177,23 @@ with tab1:
         # ── Run detection ──────────────────────────────────────
         with st.spinner("Running fraud detection..."):
             scaler = StandardScaler()
+
+            # Engineer features from raw columns
             df['Amount_scaled']   = scaler.fit_transform(df[['Amount']])
             df['Time_scaled']     = scaler.fit_transform(df[['Time']])
             df['log_amount']      = np.log1p(df['Amount'])
-            df['amount_zscore']   = (df['Amount'] - df['Amount'].mean()) / df['Amount'].std()
+            df['amount_zscore']   = (df['Amount'] - df['Amount'].mean()) / (df['Amount'].std() + 1e-9)
             df['hour']            = (df['Time'] % 86400) // 3600
             df['is_small_amount'] = (df['Amount'] < 10).astype(int)
             df['is_round_amount'] = (df['Amount'] % 10 == 0).astype(int)
 
-            drop_cols = [c for c in ['Class', 'Amount', 'Time'] if c in df.columns]
-            X = df.drop(drop_cols, axis=1)
+            # Build feature matrix using exactly what the model expects
+            X = pd.DataFrame()
             for col in feature_names:
-                if col not in X.columns:
+                if col in df.columns:
+                    X[col] = df[col]
+                else:
                     X[col] = 0.0
-            X = X[feature_names]
 
             probs = model.predict_proba(X)[:, 1]
             preds = (probs > 0.5).astype(int)
