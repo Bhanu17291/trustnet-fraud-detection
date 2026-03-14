@@ -2,6 +2,6 @@ venv/
 __pycache__/
 *.pyc
 data/
-models/
+
 alerts/cases.db
-outputs/
+
